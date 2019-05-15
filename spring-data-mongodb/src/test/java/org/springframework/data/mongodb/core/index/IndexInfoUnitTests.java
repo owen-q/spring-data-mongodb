@@ -33,6 +33,7 @@ public class IndexInfoUnitTests {
 
 	static final String ID_INDEX = "{ \"v\" : 2, \"key\" : { \"_id\" : 1 }, \"name\" : \"_id_\", \"ns\" : \"db.collection\" }";
 	static final String INDEX_WITH_PARTIAL_FILTER = "{ \"v\" : 2, \"key\" : { \"k3y\" : 1 }, \"name\" : \"partial-filter-index\", \"ns\" : \"db.collection\", \"partialFilterExpression\" : { \"quantity\" : { \"$gte\" : 10 } } }";
+	static final String HASHED_INDEX = "{ \"v\" : 2, \"key\" : { \"score\" : \"hashed\" }, \"name\" : \"score_hashed\", \"ns\" : \"db.collection\" }";
 
 	@Test
 	public void isIndexForFieldsCorrectly() {
@@ -54,6 +55,16 @@ public class IndexInfoUnitTests {
 
 		assertThat(Document.parse(getIndexInfo(INDEX_WITH_PARTIAL_FILTER).getPartialFilterExpression()))
 				.isEqualTo(Document.parse("{ \"quantity\" : { \"$gte\" : 10 } }"));
+	}
+
+	@Test // DATAMONGO-1183
+	public void readsHashedIndexCorrectly() {
+		assertThat(getIndexInfo(HASHED_INDEX).getIndexFields()).containsExactly(IndexField.hashed("score"));
+	}
+
+	@Test // DATAMONGO-1183
+	public void hashedIndexIsMarkedAsSuch() {
+		assertThat(getIndexInfo(HASHED_INDEX).isHashed()).isTrue();
 	}
 
 	private static IndexInfo getIndexInfo(String documentJson) {

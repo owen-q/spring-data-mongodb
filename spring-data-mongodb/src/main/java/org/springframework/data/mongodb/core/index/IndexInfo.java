@@ -91,12 +91,17 @@ public class IndexInfo {
 
 			} else {
 
-				Double keyValue = new Double(value.toString());
+				if (ObjectUtils.nullSafeEquals("hashed", value)) {
+					indexFields.add(IndexField.hashed(key));
+				} else {
 
-				if (ONE.equals(keyValue)) {
-					indexFields.add(IndexField.create(key, ASC));
-				} else if (MINUS_ONE.equals(keyValue)) {
-					indexFields.add(IndexField.create(key, DESC));
+					Double keyValue = new Double(value.toString());
+
+					if (ONE.equals(keyValue)) {
+						indexFields.add(IndexField.create(key, ASC));
+					} else if (MINUS_ONE.equals(keyValue)) {
+						indexFields.add(IndexField.create(key, DESC));
+					}
 				}
 			}
 		}
@@ -108,7 +113,8 @@ public class IndexInfo {
 		String language = sourceDocument.containsKey("default_language") ? (String) sourceDocument.get("default_language")
 				: "";
 		String partialFilter = sourceDocument.containsKey("partialFilterExpression")
-				? ((Document) sourceDocument.get("partialFilterExpression")).toJson() : null;
+				? ((Document) sourceDocument.get("partialFilterExpression")).toJson()
+				: null;
 
 		IndexInfo info = new IndexInfo(indexFields, name, unique, sparse, language);
 		info.partialFilterExpression = partialFilter;
@@ -181,6 +187,14 @@ public class IndexInfo {
 	 */
 	public Optional<Document> getCollation() {
 		return Optional.ofNullable(collation);
+	}
+
+	/**
+	 * @return {@literal true} if a hashed index field is present.
+	 * @since 2.2
+	 */
+	public boolean isHashed() {
+		return getIndexFields().stream().anyMatch(IndexField::isHashed);
 	}
 
 	@Override

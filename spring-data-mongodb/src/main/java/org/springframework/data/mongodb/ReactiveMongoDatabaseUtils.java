@@ -15,9 +15,6 @@
  */
 package org.springframework.data.mongodb;
 
-import reactor.core.publisher.Mono;
-import reactor.util.context.Context;
-
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.NoTransactionException;
 import org.springframework.transaction.reactive.ReactiveResourceSynchronization;
@@ -31,6 +28,9 @@ import com.mongodb.ClientSessionOptions;
 import com.mongodb.reactivestreams.client.ClientSession;
 import com.mongodb.reactivestreams.client.MongoCollection;
 import com.mongodb.reactivestreams.client.MongoDatabase;
+
+import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 /**
  * Helper class for managing reactive {@link MongoDatabase} instances via {@link ReactiveMongoDatabaseFactory}. Used for
@@ -62,7 +62,7 @@ public class ReactiveMongoDatabaseUtils {
 			return Mono.just(true);
 		}
 
-		return TransactionSynchronizationManager.currentTransaction() //
+		return TransactionSynchronizationManager.forCurrentTransaction() //
 				.map(it -> {
 
 					ReactiveMongoResourceHolder holder = (ReactiveMongoResourceHolder) it.getResource(databaseFactory);
@@ -137,7 +137,7 @@ public class ReactiveMongoDatabaseUtils {
 
 		Assert.notNull(factory, "DatabaseFactory must not be null!");
 
-		return TransactionSynchronizationManager.currentTransaction()
+		return TransactionSynchronizationManager.forCurrentTransaction()
 				.filter(TransactionSynchronizationManager::isSynchronizationActive) //
 				.flatMap(synchronizationManager -> {
 
@@ -210,7 +210,7 @@ public class ReactiveMongoDatabaseUtils {
 			this.resourceHolder = resourceHolder;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.transaction.reactive.ReactiveResourceSynchronization#shouldReleaseBeforeCompletion()
 		 */
@@ -219,7 +219,7 @@ public class ReactiveMongoDatabaseUtils {
 			return false;
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.transaction.reactive.ReactiveResourceSynchronization#processResourceAfterCommit(java.lang.Object)
 		 */
@@ -233,7 +233,7 @@ public class ReactiveMongoDatabaseUtils {
 			return Mono.empty();
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.transaction.reactive.ReactiveResourceSynchronization#afterCompletion(int)
 		 */
@@ -252,7 +252,7 @@ public class ReactiveMongoDatabaseUtils {
 			});
 		}
 
-		/* 
+		/*
 		 * (non-Javadoc)
 		 * @see org.springframework.transaction.reactive.ReactiveResourceSynchronization#releaseResource(java.lang.Object, java.lang.Object)
 		 */

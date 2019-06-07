@@ -15,11 +15,12 @@
  */
 package org.springframework.data.mongodb.core.query;
 
-import lombok.EqualsAndHashCode;
-
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import lombok.EqualsAndHashCode;
 
 import org.bson.Document;
 import org.springframework.lang.Nullable;
@@ -46,8 +47,24 @@ public class Field {
 		return this;
 	}
 
+	public Field includes(String... keys) {
+		Assert.notNull(keys, "Keys must not be null!");
+		Assert.notEmpty(keys, "Keys must not be empty!");
+
+		Arrays.asList(keys).stream().forEach(this::include);
+		return this;
+	}
+
 	public Field exclude(String key) {
 		criteria.put(key, Integer.valueOf(0));
+		return this;
+	}
+
+	public Field excludes(String... keys) {
+		Assert.notNull(keys, "Keys must not be null!");
+		Assert.notEmpty(keys, "Keys must not be empty!");
+
+		Arrays.asList(keys).stream().forEach(this::exclude);
 		return this;
 	}
 
